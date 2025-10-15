@@ -46,4 +46,8 @@ app.get("/", (req, res) => {
   res.send("Server is running & connected to MongoDB!");
 });
 
+
+app.get("/test", (req, res) => {
+  res.send("text is  to MongoDB!");
+});
 export default app;
