@@ -18,7 +18,7 @@ if (!allowedOrigin) {
 }
 
 app.use(cors({
-  origin: allowedOrigin,         // 👈 use your actual frontend URL
+  origin: process.env.FRONTEND_URL,         // 👈 use your actual frontend URL
   credentials: true,             // 👈 allows cookies / secure requests
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
