@@ -16,7 +16,7 @@ app.use(cookieParser());
 // Dynamic CORS for preflight requests
 const allowedOrigin = process.env.FRONTEND_URL;
 
-app.use(cors({
+app.use(cors({       
   origin: allowedOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
