@@ -14,13 +14,19 @@ app.use(express.json());
 app.use(cookieParser());
 
 // CORS - only allow your frontend
-const allowedOrigin = process.env.FRONTEND_URL;
+const allowedOrigin = process.env.FRONTEND_URL?.trim(); // remove accidental spaces
+console.log(allowedOrigin)
+if (!allowedOrigin) {
+  console.error("❌ FRONTEND_URL is not set!");
+}
+
 app.use(cors({
   origin: allowedOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
