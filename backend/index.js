@@ -1,53 +1,54 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import auth from './routes/auth.js';
+import auth from "./routes/auth.js";
 import cookieParser from "cookie-parser";
+import connectDB from "./config/db.js";
 import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+let isConnected = false;
 
-// Parse JSON
-app.use(express.json());
-app.use(cookieParser());
-
-// CORS - only allow your frontend
-const allowedOrigin = process.env.FRONTEND_URL?.trim(); // remove accidental spaces
-console.log(allowedOrigin)
+// ✅ CORS MUST BE FIRST (before routes & parsers)
+const allowedOrigin = process.env.FRONTEND_URL?.trim();
 if (!allowedOrigin) {
-  console.error("❌ FRONTEND_URL is not set!");
+  console.error("❌ FRONTEND_URL is not set in .env file!");
 }
 
 app.use(cors({
-  origin: allowedOrigin,
-  credentials: true,
+  origin: allowedOrigin,         // 👈 use your actual frontend URL
+  credentials: true,             // 👈 allows cookies / secure requests
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
+// ✅ Parse JSON
+app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("✅ MongoDB connected"))
-  .catch(err => {
-    console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1);
-  });
+// ✅ Parse cookies
+app.use(cookieParser());
 
-// Routes
-app.use('/api/v1/auth', auth);
+// ✅ Connect DB if not already connected
+app.use((req, res, next) => {
+  if (!isConnected) {
+    connectDB();
+    isConnected = true;
+  }
+  next();
+});
 
-// Default route
+// ✅ Routes
+app.use("/api/v1/auth", auth);
+
+// ✅ Test route
 app.get("/", (req, res) => {
   res.send("Server is running & connected to MongoDB!");
 });
 
-
 app.get("/test", (req, res) => {
-  res.send("text is  to MongoDB!");
+  res.send("Test route working fine!");
 });
+
+// ✅ Export for Vercel (do NOT app.listen)
 export default app;
