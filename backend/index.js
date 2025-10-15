@@ -9,12 +9,25 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(express.json());
+app.use(cookieParser());
+
+// Dynamic CORS for preflight requests
+const allowedOrigin = process.env.FRONTEND_URL;
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: allowedOrigin,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+// Handle OPTIONS preflight requests
+app.options("*", cors({
+  origin: allowedOrigin,
   credentials: true,
 }));
-app.use(cookieParser());
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -29,7 +42,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
 connectDB();
 
 // Routes
@@ -39,6 +51,9 @@ app.get("/", (req, res) => {
   res.send("Server is running & connected to MongoDB!");
 });
 
-const PORT = process.env.PORT || 5000;
-//app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// On Vercel, we export the app instead of calling listen()
 export default app;
+
+// If you want to run locally, uncomment this:
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
